@@ -1,5 +1,5 @@
 %build a string that will have leading 0s based on val
-function prefix = buildZPrefix(val)
+function prefix = funcBuildZPrefix(val)
     prefix = num2str(val);
     if(val<1000)
         prefix = strcat('0',prefix);   

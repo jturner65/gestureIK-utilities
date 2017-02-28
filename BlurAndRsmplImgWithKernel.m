@@ -79,7 +79,7 @@ function BlurAndRsmplImgWithKernel(inDir, outDir, krnl, numSmpls, flags)
     for imgIdx = 1:size(blrImgsMat,2)
         blrImg = reshape(blrImgsMat(:,imgIdx), 200,200);
         %imshow(blrImg);
-        imgBaseName = strcat(imgRootName,buildZPrefix(imgIdx-1),'.png'); % imgFileNames(imgIdx,1).name; <-- can't do this because interpolation might make more images than originally in clip
+        imgBaseName = strcat(imgRootName,funcBuildZPrefix(imgIdx-1),'.png'); % imgFileNames(imgIdx,1).name; <-- can't do this because interpolation might make more images than originally in clip
         imgOutFileName = strcat(outDir,'/',imgBaseName);
         imwrite(blrImg,imgOutFileName);   
     end
