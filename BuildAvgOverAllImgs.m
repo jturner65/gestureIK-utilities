@@ -1,6 +1,12 @@
 clear;
 close all;
 clc;
+%this will build an average image of all images within a specified
+%directory
+
+%%
+% User enterable quantities
+%
 
 %whether or not debugging
 debug = 1;
@@ -8,6 +14,11 @@ debug = 1;
 ltrsDir = 'flowOrig/';
 %process test/train data residing here
 baseDir = 'John/';
+
+%%
+
+
+
 %find all letter folders within this folder
 inputDir = strcat(baseDir, ltrsDir);
 

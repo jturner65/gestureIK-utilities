@@ -3,7 +3,7 @@
 %images, using the passed kernel - assumed to be centered kernel (prepend
 %or append 0's
 % flags : idx 0 == do blur or not; idx 1 == do resample or not 
-function BlurAndRsmplImgWithKernel(inDir, outDir, krnl, numSmpls, flags)
+function funcBlurRsmplWKrnl(inDir, outDir, krnl, numSmpls, flags)
     %set up directory for result images
     %mkdir(outDir);
     %source of images : inDir
@@ -53,7 +53,8 @@ function BlurAndRsmplImgWithKernel(inDir, outDir, krnl, numSmpls, flags)
             disp(strcat('error with image name : ',imgFileName));
             continue;
         end         
-    end    
+    end 
+    %if blur or not
     if(flags(1))
         blrImgsMat = (krnlMat * imgsMat')'; %b = Ax : blurring images
         outImgPrfx = 'blr_';
