@@ -4,8 +4,6 @@
 %or append 0's
 % flags : idx 0 == do blur or not; idx 1 == do resample or not 
 function funcBlurRsmplWKrnl(inDir, outDir, krnl, numSmpls, flags)
-    %set up directory for result images
-    %mkdir(outDir);
     %source of images : inDir
     %dest of blocked images : outDir
     imgFileNames = dir(inDir);    
