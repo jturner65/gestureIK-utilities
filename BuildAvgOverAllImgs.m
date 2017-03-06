@@ -53,13 +53,6 @@ if ((debug== 1) || (numDirs < 100))
         end
         fprintf('Finished with %i giving %i images\n',dirIdx, numCalcImgs);
     end
-    finalImg = totImg / totNumImgs;
-    imshow(finalImg);
-    imgBaseName = strcat('avgImage_',strrep(ltrsDir,'/','_'),'.png'); 
-    imgOutFileName = strcat(inputDir,imgBaseName);
-    imwrite(finalImg,imgOutFileName);   
-
-    fprintf('\nDone with %s\n\n',ltrsDir);    
     
 else
     %not debug, use multithreading
@@ -76,5 +69,37 @@ else
         inDirList = tmpMat(dirListRow,:);        
         funcAvgImgsInDirs(inDirList,inputDir,dirListRow,imgW, imgH);
     end
+    %by here we have 12 saved matrices/img counts named
+    %'avgImgVals_th_<#>.mat' 
+    %now load these 12 matrices, sum them together, and divide by the sum
+    %of their img counts
+ 
+    for idx = 1:12
+        matBaseName = strcat('avgImgVals_th_',num2str(idx),'.mat');
+        matFileName = strcat(inputDir,matBaseName);
+        load(matFileName, 'totImg', 'totNumImgs'); 
+        disp(num2str(idx));
+        if (idx==1)
+            sumImgMat = zeros(size(totImg));
+            numTotImgs = 0;
+        end
+%         tmpImg = totImg / totNumImgs;
+%         imshow(tmpImg);
+        %pause;
+        sumImgMat = sumImgMat + totImg;
+        numTotImgs = numTotImgs + totNumImgs;
+    
+    end
+    totImg = sumImgMat;
+    totNumImgs = numTotImgs;    
 end
+
+%% save end result
+finalImg = totImg / totNumImgs;
+imshow(finalImg);
+imgBaseName = strcat('avgImage_',strrep(ltrsDir,'/','_'),'.png'); 
+imgOutFileName = strcat(inputDir,imgBaseName);
+imwrite(finalImg,imgOutFileName);   
+
+fprintf('\nDone with %s\n\n',ltrsDir);    
 
