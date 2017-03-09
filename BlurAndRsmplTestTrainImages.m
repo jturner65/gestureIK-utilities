@@ -21,8 +21,8 @@ numImgs = 16;
 blrkrnl = [1;1;1];
 
 %process all these directories
-%ltrsDirList = {'CVEL_17022419/','CVEL_17022410/','CVEL_17022419/','CVEL_17022319/','CVEL_17022311/','CVEL_17022211/','CVEL_17022119/'};
-ltrsDirList = {''};
+ltrsDirList = {'CVEL_17022419/','CVEL_17022410/','CVEL_17022419/','CVEL_17022319/','CVEL_17022311/','CVEL_17022211/','CVEL_17022119/'};
+%ltrsDirList = {''};
 
 %%
 
@@ -44,6 +44,19 @@ for ltrIdx = 1:size(ltrsDirList,2)
     outputDir = strcat(baseDir,outputBaseDir);   
     %build cell array of names of all letter directories within inputDir 
     tmpDirRes = dir(inputDir);
+    %get file name (or names) of text file(s) holding listing of all generated clips - used
+    %to be two files, but now only partitioning into two in convert python script
+    genIDXFileList = {tmpDirRes(~[tmpDirRes.isdir]).name};
+    if (debug==0)
+        %copy text listing file(s) from generated data to output directory
+        for gIDX = 1:size(genIDXFileList,2)
+            genIDXFile = genIDXFileList{gIDX};
+            fprintf('Copying file %s from %s to %s\n',genIDXFile,inputDir,outputDir);
+            [status,message,messageId] = copyfile(strcat(inputDir,genIDXFile), strcat(outputDir,genIDXFile));
+        end
+    end
+
+    %get list of all letter directories
     letterDirs = {tmpDirRes([tmpDirRes.isdir]).name};
     letterDirs(1:2) = []; %ignore . and ..
     
@@ -70,6 +83,7 @@ for ltrIdx = 1:size(ltrsDirList,2)
         end
     else
         %not debugging
+
         delete(gcp('nocreate'));
         %12 logical cores on my laptop, set core configuration via parallel
         %computing toolkit "manage cluster profiles"
