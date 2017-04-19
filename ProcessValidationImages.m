@@ -58,7 +58,7 @@ for dirIdx = 1:size(letterDirs,2)
     outDir = strcat(outDblrDir,ltrDir);
     mkdir(outDir);
     %RemoveBlur(inDir, outDir);
-    RemoveBlurImgKern(inDir, outDir, dblrkrnl);
+    RemoveBlurImgKern(inDir, outDir, dblrkrnl, 0);
 end
 %build ValidateDataIndexFile_valid16.txt file with directory names in
 %output dir
