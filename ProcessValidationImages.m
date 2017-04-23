@@ -13,7 +13,10 @@ outBlkHeadDir = strcat(baseDir,'outLetters/letters_block/alphabets/');
 outBlkHandDir = strcat(baseDir,'outLetters/letters_blockHands/alphabets/');
 %to deblur the hand motion
 outDblrDir = strcat(baseDir,'outLetters/letters_deblur/alphabets/');
-
+%to save each screen-space trajectory in its own letter directory
+%outSSTrajDir = strcat(baseDir,'outLetters/csvJTVidLetters/');
+outSSTrajDir = 'D:/dart5-1_cs4496/dart/apps/gestureIK/jtVideoLetters/';
+mkdir(outSSTrajDir);
 
 % Create a cascade detector object.
 faceDetector = vision.CascadeObjectDetector();      %can detect mouths too
@@ -55,10 +58,13 @@ for dirIdx = 1:size(letterDirs,2)
     %mkdir(outDir);
     %CoverHandWithBlock(inDir, outDir);  
     %deblur hand motion
-    outDir = strcat(outDblrDir,ltrDir);
-    mkdir(outDir);
+    %outDir = strcat(outDblrDir,ltrDir);
+    %mkdir(outDir);
     %RemoveBlur(inDir, outDir);
-    RemoveBlurImgKern(inDir, outDir, dblrkrnl, 0);
+    %RemoveBlurImgKern(inDir, outDir, dblrkrnl, 0);
+    BuildTrajCSVs(inputDir, ltrDir, outSSTrajDir, dblrkrnl, 0);
 end
-%build ValidateDataIndexFile_valid16.txt file with directory names in
-%output dir
+%%
+%build xml indexing file of source trajectories
+% only run the below code if building trajectory csvs
+BuildTrajXMLFiles(outSSTrajDir);

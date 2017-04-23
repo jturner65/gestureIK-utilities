@@ -58,8 +58,6 @@ function RemoveBlurImgKern(inDir, outDir, krnl, debug)
 
     zMat = zeros(size(reshape(dblrMatToUse(:,imgIdx), 200,200)));
     ctr = [100,100];
-    %ctr and ctr vel of hand
-    ctrRes = zeros(size(dblrMatToUse,2),4); 
     %find centers
     for imgIdx = 1:size(dblrMatToUse,2)
         dlbrImg = reshape(dblrMatToUse(:,imgIdx), 200,200);
@@ -81,70 +79,25 @@ function RemoveBlurImgKern(inDir, outDir, krnl, debug)
         end
         ctr = max(ctr,0);
         ctr = min(ctr,190);        
-        ctrRes(imgIdx,1:2) = ctr; %build rest of values based on smoothing results 
-    end
-    %smooth per column
-    smthDat = zeros(size(ctrRes));
-    smthDatInvY = zeros(size(ctrRes));
-    for I = 1:size(ctrRes,2)
-        %weighted linear least squares 2nd order poly, outlier rejection
-        smthDat(:,I) = smooth(ctrRes(:,I),0.1,'rloess');
-    end
-    smthDatInvY(:,1) = smthDat(:,1);
-    smthDatInvY(:,2) = 200 - smthDat(:,2);                
 
-    smthDat(:,3:4) = calcVel(smthDat,ctrRes);
-    smthDatInvY(:,3:4) = calcVel(smthDatInvY,ctrRes);
-    
-    csvBaseName = imgFileNames(1,1).name;
-    uLocs = strfind(csvBaseName,'_');  %use uLocs(2)
-    outNameStr = strcat(csvBaseName(1:(uLocs(2)-1)),'.csv');
-    csvOutDir = 'john/outLetters/csvLetters/';
-    mkdir(csvOutDir);
-    csvOutFileName = strcat(csvOutDir,outNameStr);
-    dlmwrite(csvOutFileName,smthDatInvY,'precision','%.6f');
-    for imgIdx = 1:size(smthDat,1)
-        strVec = sprintf('%0.5f, ',smthDat(imgIdx,:));
-        strVec2 = sprintf('%0.5f, ',smthDatInvY(imgIdx,:));
-        fprintf('IDX : %d : %s (%s) | (%s) \n',imgIdx, csvOutFileName, strVec, strVec2);
-        
-        %write strVec2 to csv
-    end
-    
-    
-    fprintf('\n');
-    %only display if debug is true
-    if(debug==1)
-        for imgIdx = 1:size(dblrMatToUse,2)
-            dlbrImg = reshape(dblrMatToUse(:,imgIdx), 200,200);
-            if(imgIdx == 1 )
-                diffImg = dlbrImg;
-            else     
-                diffImg = max(dlbrImg - reshape(dblrMatToUse(:,imgIdx-1), 200,200),zMat);
-            end
-            %dlbrImg(dlbrImg>.8) = 1; 
-            %bw = (mean(diffImg(1:200,20:150),3) > .5);
-            ctr = round(smthDat(imgIdx,:)); 
-            %put white square centered on where centroid is assumed to be
-
-            yHighVal = ctr(2)+10;
-            if(yHighVal > 200)
-                yHighVal = 200;
-            end
-            diffImg(ctr(2)-10:yHighVal,ctr(1)-10:ctr(1)+10) = 1;
-            %replace with rectangle
-    %         if(imgIdx == 94)
-    %             disp('stop');
-    %         end
-            imshow([reshape(imgsMat(:,imgIdx), 200,200), dlbrImg ,diffImg]);
-            %imshow([reshape(imgsMat(:,imgIdx), 200,200), dlbrImg ]);
-            imgBaseName = imgFileNames(imgIdx,1).name;
-            uLocs = strfind(imgBaseName,'_');  %use uLocs(end)
-            outNameStr = strcat(imgBaseName(1:uLocs(end)),'deblur',imgBaseName(uLocs(end):end));
-            imgOutFileName = strcat(outDir,'/',outNameStr);
-           % imwrite(dlbrImg,imgOutFileName);  
+        yHighVal = ctr(2)+10;
+        if(yHighVal > 200)
+            yHighVal = 200;
         end
+        diffImg(ctr(2)-10:yHighVal,ctr(1)-10:ctr(1)+10) = 1;
+        %replace with rectangle
+%         if(imgIdx == 94)
+%             disp('stop');
+%         end
+        imshow([reshape(imgsMat(:,imgIdx), 200,200), dlbrImg ,diffImg]);
+        %imshow([reshape(imgsMat(:,imgIdx), 200,200), dlbrImg ]);
+        imgBaseName = imgFileNames(imgIdx,1).name;
+        uLocs = strfind(imgBaseName,'_');  %use uLocs(end)
+        outNameStr = strcat(imgBaseName(1:uLocs(end)),'deblur',imgBaseName(uLocs(end):end));
+        imgOutFileName = strcat(outDir,'/',outNameStr);
+        imwrite(dlbrImg,imgOutFileName);  
     end
+
 end
 
 function velVec = calcVel(smthDat,ctrRes)

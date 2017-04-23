@@ -1,11 +1,8 @@
 %%
-%this function attemps to remove blur in image caps by inverting the blurring process.
-%assuming the blur is caused by a weighted mixture of images over a sequence of frames, this  
-%function builds a system of equations Ax = b where A is weighting and b is blurred images, and 
-%solves for x
-function RemoveBlurImgKern(inDir, outDir, krnl, debug)
-    %set up directory for result images
-    mkdir(outDir);
+%this function saves estimate of hand trajectory in images of a letter
+%performs on per-letter basis
+function BuildTrajCSVs(inputDir, ltrDir, csvOutBaseDir, krnl, debug)
+    inDir = strcat(inputDir,ltrDir);
     %source of images : inDir
     %dest of blocked images : outDir
     imgFileNames = dir(inDir);    
@@ -96,20 +93,21 @@ function RemoveBlurImgKern(inDir, outDir, krnl, debug)
     smthDat(:,3:4) = calcVel(smthDat,ctrRes);
     smthDatInvY(:,3:4) = calcVel(smthDatInvY,ctrRes);
     
-    csvBaseName = imgFileNames(1,1).name;
-    uLocs = strfind(csvBaseName,'_');  %use uLocs(2)
-    outNameStr = strcat(csvBaseName(1:(uLocs(2)-1)),'.csv');
-    csvOutDir = 'john/outLetters/csvLetters/';
-    mkdir(csvOutDir);
-    csvOutFileName = strcat(csvOutDir,outNameStr);
-    dlmwrite(csvOutFileName,smthDatInvY,'precision','%.6f');
-    for imgIdx = 1:size(smthDat,1)
-        strVec = sprintf('%0.5f, ',smthDat(imgIdx,:));
-        strVec2 = sprintf('%0.5f, ',smthDatInvY(imgIdx,:));
-        fprintf('IDX : %d : %s (%s) | (%s) \n',imgIdx, csvOutFileName, strVec, strVec2);
-        
-        %write strVec2 to csv
-    end
+    saveGestIKCSV(ltrDir, csvOutBaseDir, smthDatInvY);
+%     csvBaseName = imgFileNames(1,1).name;
+%     uLocs = strfind(csvBaseName,'_');  %use uLocs(2)
+%     outNameStr = strcat(csvBaseName(1:(uLocs(2)-1)),'.csv');
+%     csvOutDir = csvOutBaseDir;
+%     mkdir(csvOutDir);
+%     csvOutFileName = strcat(csvOutDir,outNameStr);
+%     dlmwrite(csvOutFileName,smthDatInvY,'precision','%.6f');
+    
+%     for imgIdx = 1:size(smthDat,1)
+%         strVec = sprintf('%0.5f, ',smthDat(imgIdx,:));
+%         strVec2 = sprintf('%0.5f, ',smthDatInvY(imgIdx,:));
+%         fprintf('IDX : %d : %s (%s) | (%s) \n',imgIdx, csvOutFileName, strVec, strVec2);
+%         %write strVec2 to csv
+%     end
     
     
     fprintf('\n');
@@ -138,11 +136,6 @@ function RemoveBlurImgKern(inDir, outDir, krnl, debug)
     %         end
             imshow([reshape(imgsMat(:,imgIdx), 200,200), dlbrImg ,diffImg]);
             %imshow([reshape(imgsMat(:,imgIdx), 200,200), dlbrImg ]);
-            imgBaseName = imgFileNames(imgIdx,1).name;
-            uLocs = strfind(imgBaseName,'_');  %use uLocs(end)
-            outNameStr = strcat(imgBaseName(1:uLocs(end)),'deblur',imgBaseName(uLocs(end):end));
-            imgOutFileName = strcat(outDir,'/',outNameStr);
-           % imwrite(dlbrImg,imgOutFileName);  
         end
     end
 end
@@ -151,7 +144,19 @@ function velVec = calcVel(smthDat,ctrRes)
     %calc velocity
     velVec = zeros(size(ctrRes,1),2);
     velVec(2:end,:) = smthDat(2:end,1:2) - smthDat(1:end-1,1:2);
-    %resultant data - save as CSV
+end
+
+function saveGestIKCSV(srcLtrDir, csvOutBaseDir,smthDatInvY)
+    %follow format expected in gestureIK gen program
+    uLocs = strfind(srcLtrDir,'_');  %use uLocs(1)+1 for letter
+    ltrFName = strcat('ltr_',srcLtrDir(uLocs(1)+1));
+    alphabetNum = srcLtrDir(uLocs(1)-1) - 2;
+    ltrDir = strcat(csvOutBaseDir,ltrFName);
+    ltrSaveFile = strcat(ltrDir,'/',ltrFName,'_cpy_',alphabetNum,'_trj_0.csv');
+    fprintf('Ltr Dir : %s  | Ltr Filename : %s \n',ltrDir,ltrSaveFile);
+    mkdir(ltrDir);%gives warning if exists
+    
+    dlmwrite(ltrSaveFile,smthDatInvY,'precision','%.6f');
 end
 
 function plotCtr(smthDat, ctrRes)
